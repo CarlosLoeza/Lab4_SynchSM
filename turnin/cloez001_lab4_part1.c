@@ -66,7 +66,6 @@ int main(void) {
     /* Insert your solution below */
     while (1) {
 	tmpA = PINA & 0x01; 
-        prev = 0;
 	Blink();
     }
 
