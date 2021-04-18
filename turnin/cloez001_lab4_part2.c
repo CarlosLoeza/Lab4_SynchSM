@@ -15,52 +15,80 @@
 
 unsigned char tmpA;
 unsigned char count;
-unsigned char hold;
-
-enum Increment_States {Increment_SMState, Increment_Up, Increment_Minus, Increment_Reset, Increment_Hold} Increment_State;
-
+enum Count_States {Count_Start, Count_Wait, Count_Up, Count_Up_Wait, Count_Down, Count_Down_Wait, Count_Zero, Count_Reset} Count_State;
 
 void Increment_Decrement(){
 
-    switch(Increment_State){
-	case Increment_SMState:
-	    if(tmpA == 0x03 ){
- 		Increment_State = Increment_Reset;
+    switch(Count_State){
+	case Count_Start:
+	    Count_State = Count_Wait;
+	    break;
+	case Count_Wait:
+	    if(tmpA == 0){
+		Count_State = Count_Wait;
+	    } else if(tmpA == 0x01){
+		Count_State = Count_Up;
+	    } else {
+		Count_State = Count_Down;
 	    }
-  	    else if(tmpA == 0x02 && count != 0){
-		Increment_State = Increment_Minus;
+	    break;
+	case Count_Up:
+	    Count_State = Count_Up_Wait;
+	    break;
+	case Count_Up_Wait:
+	    if(tmpA == 0){
+		Count_State = Count_Wait;
 	    }
-	    else if(tmpA == 0x01 && count != 9){
-		Increment_State = Increment_Up;
+	    else if(tmpA == 0x01){
+		Count_State = Count_Up_Wait;
+	    }else if (tmpA == 0x02){
+		Count_State = Count_Down;
+	    } else if (tmpA == 0x03){
+		Count_State = Count_Zero;
+	    } 
+	    break;
+	case Count_Down:
+	    Count_State = Count_Down_Wait;
+	    break;
+	case Count_Down_Wait:
+	    if(tmpA ==0){
+		Count_State = Count_Wait;
 	    }
-	    else if(tmpA == 0x00){
-		Increment_State = Increment_Hold;
+	    else if(tmpA == 0x01){ 
+                Count_State = Count_Up;
+            } else if (tmpA == 0x02){ 
+                Count_State = Count_Down_Wait;
+            } else if (tmpA == 0x03){ 
+                Count_State = Count_Zero;
             }
-	    break;
-	case Increment_Up:
-	    count++;
-	    Increment_State = Increment_Hold;
-	    hold = 1;
-	    break;
-	case Increment_Minus:
-	    count--;
-	    Increment_State = Increment_Hold;
-	    hold = 1;
-	    break;
-	case Increment_Reset:
-	    count = 0;
-	    Increment_State = Increment_Hold;
-	    break;
-	case Increment_Hold:
-	    if(tmpA == 0x00){
-		Increment_State = Increment_SMState;
+	case Count_Zero:
+	    if(tmpA == 0x03){
+		Count_State = Count_Zero;
 	    }
-	    else if(tmpA == 0x03){
-		Increment_State = Increment_Reset;
+	    else if(tmpA == 0x01){
+		Count_State = Count_Up;
+	    } else if(tmpA ==0x02){
+		Count_State = Count_Down;
 	    }
 	    break;
 	default:
-	    Increment_State = Increment_SMState;
+	    Count_State = Count_State;
+	    break;
+    }
+
+    switch(Count_State){
+	case Count_Up:
+	    if(count <9){
+		count++;
+	    }
+	    break;
+	case Count_Down:
+	    if(count > 0){
+		count--;
+	    }
+	    break;
+   	case Count_Zero:
+	    count = 0;
 	    break;
     }
 
@@ -71,9 +99,10 @@ int main(void)
 {
     // PORTA: input   PORTC: output
     DDRA = 0x00; PORTA = 0xFF; 
-    DDRC = 0xFF; PORTC = 0x07; 
+    DDRC = 0xFF; PORTC = 0x00; 
     count = 7;
-
+    
+    Count_State = Count_Start; 
     while (1) 
     {
 	tmpA = PINA & 0x03;
