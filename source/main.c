@@ -15,7 +15,7 @@
 #endif
 
 unsigned char tmpA;
-unsigned char count;
+unsigned char tmpB;
 enum Lock_States {Lock_Start, Lock_Wait, Lock_Pound, Lock_Y, Lock_Inside} Lock_State;
 
 void Lock(){
@@ -27,7 +27,7 @@ void Lock(){
 	    if(tmpA == 0x01 || tmpA == 0x02){
 		Lock_State = Lock_Wait;
 	    } else if(tmpA ==0x04){
-		Lock_State = Lock_Pound
+		Lock_State = Lock_Pound;
 	    } 
 	    break;
 	case Lock_Pound:
@@ -41,7 +41,7 @@ void Lock(){
 	    break;
 	case Lock_Y:
 	    if(tmpA == 0x00){
-		Lock_State = Lock_Y
+		Lock_State = Lock_Y;
 	    }
 	    else if(tmpA == 0x80){
 		Lock_State = Lock_Inside;
@@ -51,40 +51,32 @@ void Lock(){
 	case Lock_Inside:
 	    
 	default:
-	    Count_State = Count_State;
+	    Lock_State = Lock_Wait;
 	    break;
     }
 
-    switch(Count_State){
-	case Count_Up:
-	    if(count <9){
-		++count;
-	    }
-	    break;
-	case Count_Down:
-	    if(count > 0){
-		--count;
-	    }
-	    break;
-   	case Count_Zero:
-	    count = 0;
-	    break;
+    switch(Lock_State){
+	case Lock_Pound:
+	    tmpB = 0;
+	case Lock_Y:
+	    tmpB = 1;
+	case Lock_Inside:
+	    tmpB = 0;
     }
 
-    PORTC = count;
+    PORTB = tmpB;
 }
 
 int main(void)
 {
     // PORTA: input   PORTC: output
     DDRA = 0x00; PORTA = 0xFF; 
-    DDRC = 0xFF; PORTC = 0x00; 
-    count = 7;
-    
-    Count_State = Count_Start; 
+    DDRB = 0xFF; PORTB = 0x00; 
+    tmpB = 0;
+    Lock_State = Lock_Wait; 
     while (1) 
     {
 	tmpA = PINA & 0x03;
-	Increment_Decrement();
+	Lock();
     }
 }
