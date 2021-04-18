@@ -1,4 +1,5 @@
 
+
 /*	Author: lab
  *  Partner(s) Name: 
  *	Lab Section:
@@ -28,12 +29,22 @@ void Increment_Decrement(){
 		Count_State = Count_Wait;
 	    } else if(tmpA == 0x01){
 		Count_State = Count_Up;
-	    } else {
+	    } else if(tmpA == 0x02){
 		Count_State = Count_Down;
+	    } else if(tmpA == 0x03){
+		Count_State = Count_Zero;
 	    }
 	    break;
 	case Count_Up:
-	    Count_State = Count_Up_Wait;
+	    if(tmpA == 0x01){
+	        Count_State = Count_Up_Wait;
+	    } else if (tmpA == 0x02){
+	   	Count_State = Count_Down;
+	    } else if(tmpA == 0x03){
+		Count_State = Count_Zero;
+	    } else if(tmpA == 0){
+		Count_State = Count_Wait;
+	    }
 	    break;
 	case Count_Up_Wait:
 	    if(tmpA == 0){
@@ -48,8 +59,16 @@ void Increment_Decrement(){
 	    } 
 	    break;
 	case Count_Down:
-	    Count_State = Count_Down_Wait;
-	    break;
+	    if(tmpA == 0x01){
+	        Count_State = Count_Up;
+	    } else if(tmpA == 0x02){
+		Count_State = Count_Down_Wait;
+  	    } else if(tmpA == 0x03){
+		Count_State = Count_Zero;
+	    } else if(tmpA == 0){
+		Count_State = Count_Wait;
+	    }
+  	    break;
 	case Count_Down_Wait:
 	    if(tmpA ==0){
 		Count_State = Count_Wait;
@@ -69,6 +88,8 @@ void Increment_Decrement(){
 		Count_State = Count_Up;
 	    } else if(tmpA ==0x02){
 		Count_State = Count_Down;
+	    }else if(tmpA == 0){
+		Count_State = Count_Wait;
 	    }
 	    break;
 	default:
@@ -79,12 +100,12 @@ void Increment_Decrement(){
     switch(Count_State){
 	case Count_Up:
 	    if(count <9){
-		count++;
+		++count;
 	    }
 	    break;
 	case Count_Down:
 	    if(count > 0){
-		count--;
+		--count;
 	    }
 	    break;
    	case Count_Zero:
