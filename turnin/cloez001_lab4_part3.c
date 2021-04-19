@@ -77,7 +77,9 @@ void Lock(){
 	    tmpB = 1;
 	    break;
 	case Lock_Inside:
-	    tmpB = 0;
+	    if(tmpA == 0x80){
+	    	tmpB = 0;
+	    } 
 	    break;
     }
     PORTB = tmpB;
