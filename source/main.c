@@ -14,7 +14,7 @@
 
 unsigned char tmpA;
 unsigned char tmpB;
-unsigned char prev;
+unsigned char firstLoop;
 enum Lock_States {Lock_Start, Lock_Wait, Lock_Pound, Lock_Pound_Held, Lock_Y, Lock_Y_Held, Lock_Inside} Lock_State;
 
 void Lock(){
@@ -82,66 +82,18 @@ void Lock(){
 	    break;
 	case Lock_Inside:
 	    if(tmpA == 0x80){
-	    	if(tmpB == 0){
+	    	if(tmpB == 0 && firstLoop){
+		    tmpB = 0;
+	 	} else if(tmpB ==0 && !firstLoop){
 		    tmpB = 1;
-	 	} else {
+		} 
+		else if(tmpB == 1) {
 		    tmpB = 0;
 		}
 	    } 
 	    break;
     }
     PORTB = tmpB;
-/*	
-	case Lock_Wait:
-	    if(tmpA == 0x01 || tmpA == 0x02){
-		Lock_State = Lock_Wait;
-		prev = tmpA;
-	    } else if(tmpA ==0x04 && prev ==0){
-		Lock_State = Lock_Pound;
-		prev = tmpA;
-	    } 
-	    break;
-	case Lock_Pound:
-	    if(tmpA == 0x04 || tmpA != 0x01 || tmpA != 0x02){
-		Lock_State = Lock_Pound;
-		prev = tmpA;
-	    } else if (tmpA == 0x02){
-		Lock_State = Lock_Y;
-		prev = tmpA;
-	    } else if(tmpA == 0x01 || tmpA == 0x00){
-		Lock_State = Lock_Wait;
-		prev = tmpA;
-	    }
-	    break;
-	case Lock_Y:
-	    if(tmpA == 0x00){
-		Lock_State = Lock_Y;
-		prev = tmpA;
-	    }
-	    else if(tmpA == 0x80){
-		Lock_State = Lock_Inside;
-		prev = tmpA;
-	    }else {
-		Lock_State = Lock_Wait;
-		prev = tmpA;
-	    }
-	case Lock_Inside:
-	    Lock_State = Lock_Wait;
-	    break;
-	default:
-	    Lock_State = Lock_Wait;
-	    break;
-    }
-
-    switch(Lock_State){
-	case Lock_Pound:
-	    tmpB = 0;
-	case Lock_Y:
-	    tmpB = 0x01;
-	case Lock_Inside:
-	    tmpB = 0;
-    }
-    PORTB = tmpB;*/
 }
 
 int main(void)
@@ -150,7 +102,7 @@ int main(void)
     DDRA = 0x00; PORTA = 0xFF; 
     DDRB = 0xFF; PORTB = 0x00; 
     tmpB = 0;
-    prev = 0;
+    firstLoop = 1;
     Lock_State = Lock_Wait; 
     while (1) 
     {
