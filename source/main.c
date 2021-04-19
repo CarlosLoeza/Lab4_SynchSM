@@ -12,101 +12,74 @@
 #include "simAVRHeader.h"
 #endif
 
+
 unsigned char tmpA;
 unsigned char tmpB;
-unsigned char firstLoop;
-enum Lock_States {Lock_Start, Lock_Wait, Lock_Pound, Lock_Pound_Held, Lock_Y, Lock_Y_Held, Lock_Inside} Lock_State;
+unsigned char prev; // keeps track of the last state of Pin A0 to see if it still being pressed
+enum TurnOn {TurnOn_Start, TurnOn_PB0, TurnOn_PB0_Wait, TurnOn_PB1, TurnOn_PB1_Wait} TurnOn_State;
 
-void Lock(){
-    switch(Lock_State){
-	case Lock_Start:
-	    Lock_State = Lock_Wait;
+void Blink(){
+    switch(TurnOn_State){
+	case TurnOn_Start:
+	    TurnOn_State = TurnOn_PB0;
 	    break;
-	case Lock_Wait:
-	    if(tmpA == 0x04){
- 		Lock_State = Lock_Pound;
-	    } else if(tmpA == 0x01 || tmpA == 0x02){
-		Lock_State = Lock_Wait;
-	    }
-	    break;
-	case Lock_Pound:
-	    if (tmpA == 0x04){ 
-                Lock_State = Lock_Pound_Held;  
-            } else if(tmpA == 0x02){
-		Lock_State = Lock_Y;
-	    } else if (tmpA == 0x00){
-		Lock_State = Lock_Pound;
-	    } else{
-		Lock_State = Lock_Wait;
+	case TurnOn_PB0:
+	    if(tmpA){
+		TurnOn_State = TurnOn_PB0_Wait;
+	    }else if(!tmpA) {
+		TurnOn_State = TurnOn_PB0;
 	    }
 	    break;
-	case Lock_Pound_Held:
-	    if(tmpA == 0x04){
-		Lock_State = Lock_Pound_Held;
-	    } else if(tmpA == 0){
-		Lock_State = Lock_Y;
-	    }
-	case Lock_Y:
-	    if(tmpA == 0){
-		Lock_State = Lock_Y;
- 	    }
-	    else if(tmpA == 0x01 || tmpA == 0x04){
-		Lock_State = Lock_Wait;
-	    }
-	    else if (tmpA == 0x02){
-		Lock_State = Lock_Y_Held;
-	    } 
-	    break;
-	case Lock_Y_Held:
-	    if(tmpA == 0){
-		Lock_State = Lock_Inside;
-	    } else if(tmpA == 0x02){
-		Lock_State = Lock_Y_Held;
+	case TurnOn_PB0_Wait:
+	    if(tmpA){
+		TurnOn_State = TurnOn_PB0_Wait;
+	    } else if(!tmpA){
+		TurnOn_State = TurnOn_PB1;
 	    }
 	    break;
-	case Lock_Inside:
-	    if(tmpA == 0){
-		Lock_State = Lock_Wait;
+	case TurnOn_PB1:
+	    if(tmpA){
+		TurnOn_State = TurnOn_PB1_Wait;
+	    } else if (!tmpA){
+		TurnOn_State = TurnOn_PB1;
 	    }
+	    break;
+	case TurnOn_PB1_Wait:
+	    if(tmpA){
+		TurnOn_State = TurnOn_PB1_Wait;
+	    } else if(!tmpA){
+		TurnOn_State = TurnOn_PB0;
+	    }
+	    break;
+	default:
+	    TurnOn_State = TurnOn_Start;
+	    break;
     }
 
-    switch(Lock_State){
-	case Lock_Wait:
-	    tmpB = 0;
-	    break;
-	case Lock_Pound:
-	    tmpB = 0;
-	    break;
-	case Lock_Y:
-	    tmpB = 1;
-	    break;
-	case Lock_Inside:
-	    if(tmpA == 0x80){
-	    	if(tmpB == 0 && firstLoop){
-		    tmpB = 0;
-	 	} else if(tmpB ==0 && !firstLoop){
-		    tmpB = 1;
-		} 
-		else if(tmpB == 1) {
-		    tmpB = 0;
-		}
-	    } 
-	    break;
+    switch(TurnOn_State){
+	case TurnOn_PB0:
+	   tmpB = 0x01;
+	   break;
+	case TurnOn_PB1:
+	   tmpB = 0x02;
+	   break;
     }
     PORTB = tmpB;
+
 }
 
-int main(void)
-{
-    // PORTA: input   PORTC: output
-    DDRA = 0x00; PORTA = 0xFF; 
-    DDRB = 0xFF; PORTB = 0x00; 
-    tmpB = 0;
-    firstLoop = 1;
-    Lock_State = Lock_Wait; 
-    while (1) 
-    {
-	tmpA = PINA & 0xFF;
-	Lock();
+int main(void) {
+    /* Insert DDR and PORT initializations */
+    DDRA = 0x00; PORTA = 0xFF;
+    DDRB = 0xFF; PORTB = 0x00;
+
+    TurnOn_State = TurnOn_Start;
+
+    /* Insert your solution below */
+    while (1) {
+	tmpA = PINA & 0x01; 
+	Blink();
     }
+
 }
+

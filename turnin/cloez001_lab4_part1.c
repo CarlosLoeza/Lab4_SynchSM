@@ -16,7 +16,7 @@
 unsigned char tmpA;
 unsigned char tmpB;
 unsigned char prev; // keeps track of the last state of Pin A0 to see if it still being pressed
-enum TurnOn {TurnOn_Start, TurnOn_PB0, TurnOn_PB1} TurnOn_State;
+enum TurnOn {TurnOn_Start, TurnOn_PB0, TurnOn_PB0_Wait, TurnOn_PB1, TurnOn_PB1_Wait} TurnOn_State;
 
 void Blink(){
     switch(TurnOn_State){
@@ -24,19 +24,31 @@ void Blink(){
 	    TurnOn_State = TurnOn_PB0;
 	    break;
 	case TurnOn_PB0:
-	    if(tmpA && prev == 0){
-		TurnOn_State = TurnOn_PB1;
-		prev = tmpA;
-	    }else{
+	    if(tmpA){
+		TurnOn_State = TurnOn_PB0_Wait;
+	    }else if(!tmpA) {
 		TurnOn_State = TurnOn_PB0;
-		prev = tmpA;
+	    }
+	    break;
+	case TurnOn_PB0_Wait:
+	    if(tmpA){
+		TurnOn_State = TurnOn_PB0_Wait;
+	    } else if(!tmpA){
+		TurnOn_State = TurnOn_PB1;
 	    }
 	    break;
 	case TurnOn_PB1:
-	    if(tmpA && prev == 0){
-		TurnOn_State = TurnOn_PB0;
-	    } else {
+	    if(tmpA){
+		TurnOn_State = TurnOn_PB1_Wait;
+	    } else if (!tmpA){
 		TurnOn_State = TurnOn_PB1;
+	    }
+	    break;
+	case TurnOn_PB1_Wait:
+	    if(tmpA){
+		TurnOn_State = TurnOn_PB1_Wait;
+	    } else if(!tmpA){
+		TurnOn_State = TurnOn_PB0;
 	    }
 	    break;
 	default:
@@ -70,3 +82,4 @@ int main(void) {
     }
 
 }
+

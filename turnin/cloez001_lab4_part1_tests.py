@@ -1,6 +1,3 @@
-
-
-
 # Array of tests to run (in order)
 # Each test contains
 #   description - 
@@ -24,11 +21,11 @@ tests = [ {'description': 'PINA: 0x00, 0x01, 0x00 => PORTB: 0x02',
               {'inputs': [('PINA', 0x00)], 'iterations': 1}],
     'expected': [('PORTB',0x02)],
     },
-    {'description': 'PINA: 0x00, 0x01, 0x01, 0x00 => PORTB: 0x02',
+    {'description': 'PINA: 0x00, 0x01, 0x01, 0x01 => PORTB: 0x02',
     'steps': [{'inputs': [('PINA', 0x00)], 'iterations': 1},
               {'inputs': [('PINA', 0x01)], 'iterations': 1},
               {'inputs': [('PINA', 0x01)], 'iterations': 1}, 
-	      {'inputs': [('PINA', 0x00)], 'iterations': 1}],
+	      {'inputs': [('PINA', 0x01)], 'iterations': 1}],
     'expected': [('PORTB',0x02)],
     },
     {'description': 'PINA: 0x00, 0x01, 0x01, 0x00 => PORTB: 0x02',
@@ -50,5 +47,4 @@ tests = [ {'description': 'PINA: 0x00, 0x01, 0x00 => PORTB: 0x02',
 
     ]
 
-#watch = ['state']
-
+#watch = ['']
