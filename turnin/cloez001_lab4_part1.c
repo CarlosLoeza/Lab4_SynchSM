@@ -25,7 +25,8 @@ void Blink(){
 	    break;
 	case TurnOn_PB0:
 	    if(tmpA){
-		TurnOn_State = TurnOn_PB0_Wait;
+            TurnOn_State = TurnOn_PB0_Wait;
+            tmpB = 0x02;
 	    }else if(!tmpA) {
 		TurnOn_State = TurnOn_PB0;
 	    }
@@ -39,7 +40,8 @@ void Blink(){
 	    break;
 	case TurnOn_PB1:
 	    if(tmpA){
-		TurnOn_State = TurnOn_PB1_Wait;
+            TurnOn_State = TurnOn_PB1_Wait;
+            tmpB = 0x01;
 	    } else if (!tmpA){
 		TurnOn_State = TurnOn_PB1;
 	    }
@@ -73,7 +75,7 @@ int main(void) {
     DDRA = 0x00; PORTA = 0xFF;
     DDRB = 0xFF; PORTB = 0x00;
 
-    TurnOn_State = TurnOn_Start;
+    TurnOn_State = TurnOn_PB0;
 
     /* Insert your solution below */
     while (1) {
