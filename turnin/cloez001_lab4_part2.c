@@ -80,6 +80,7 @@ void Increment_Decrement(){
             } else if (tmpA == 0x03){ 
                 Count_State = Count_Zero;
             }
+	    break;
 	case Count_Zero:
 	    if(tmpA == 0x03){
 		Count_State = Count_Zero;
@@ -100,12 +101,12 @@ void Increment_Decrement(){
     switch(Count_State){
 	case Count_Up:
 	    if(count <9){
-		++count;
+		count = count+1;
 	    }
 	    break;
 	case Count_Down:
 	    if(count > 0){
-		--count;
+		count = count-1;;
 	    }
 	    break;
    	case Count_Zero:
@@ -123,10 +124,11 @@ int main(void)
     DDRC = 0xFF; PORTC = 0x00; 
     count = 7;
     
-    Count_State = Count_Start; 
+    Count_State = Count_Wait; 
     while (1) 
     {
 	tmpA = PINA & 0x03;
 	Increment_Decrement();
     }
 }
+

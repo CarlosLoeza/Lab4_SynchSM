@@ -1,3 +1,5 @@
+
+
 /*	Author: lab
  *  Partner(s) Name: 
  *	Lab Section:
@@ -12,76 +14,121 @@
 #include "simAVRHeader.h"
 #endif
 
-
 unsigned char tmpA;
-unsigned char tmpB;
-unsigned char prev; // keeps track of the last state of Pin A0 to see if it still being pressed
-enum TurnOn {TurnOn_Start, TurnOn_PB0, TurnOn_PB0_Wait, TurnOn_PB1, TurnOn_PB1_Wait} TurnOn_State;
+unsigned char count;
+enum Count_States {Count_Start, Count_Wait, Count_Up, Count_Up_Wait, Count_Down, Count_Down_Wait, Count_Zero, Count_Reset} Count_State;
 
-void Blink(){
-    switch(TurnOn_State){
-	case TurnOn_Start:
-	    TurnOn_State = TurnOn_PB0;
+void Increment_Decrement(){
+
+    switch(Count_State){
+	case Count_Start:
+	    Count_State = Count_Wait;
 	    break;
-	case TurnOn_PB0:
-	    if(tmpA){
-		TurnOn_State = TurnOn_PB0_Wait;
-	  	tmpB = 0x02;
-	    }else if(!tmpA) {
-		TurnOn_State = TurnOn_PB0;
+	case Count_Wait:
+	    if(tmpA == 0){
+		Count_State = Count_Wait;
+	    } else if(tmpA == 0x01){
+		Count_State = Count_Up;
+	    } else if(tmpA == 0x02){
+		Count_State = Count_Down;
+	    } else if(tmpA == 0x03){
+		Count_State = Count_Zero;
 	    }
 	    break;
-	case TurnOn_PB0_Wait:
-	    if(tmpA){
-		TurnOn_State = TurnOn_PB0_Wait;
-	    } else if(!tmpA){
-		TurnOn_State = TurnOn_PB1;
+	case Count_Up:
+	    if(tmpA == 0x01){
+	        Count_State = Count_Up_Wait;
+	    } else if (tmpA == 0x02){
+	   	Count_State = Count_Down;
+	    } else if(tmpA == 0x03){
+		Count_State = Count_Zero;
+	    } else if(tmpA == 0){
+		Count_State = Count_Wait;
 	    }
 	    break;
-	case TurnOn_PB1:
-	    if(tmpA){
-		TurnOn_State = TurnOn_PB1_Wait;
-		tmpB = 0x01;
-	    } else if (!tmpA){
-		TurnOn_State = TurnOn_PB1;
+	case Count_Up_Wait:
+	    if(tmpA == 0){
+		Count_State = Count_Wait;
 	    }
+	    else if(tmpA == 0x01){
+		Count_State = Count_Up_Wait;
+	    }else if (tmpA == 0x02){
+		Count_State = Count_Down;
+	    } else if (tmpA == 0x03){
+		Count_State = Count_Zero;
+	    } 
 	    break;
-	case TurnOn_PB1_Wait:
-	    if(tmpA){
-		TurnOn_State = TurnOn_PB1_Wait;
-	    } else if(!tmpA){
-		TurnOn_State = TurnOn_PB0;
+	case Count_Down:
+	    if(tmpA == 0x01){
+	        Count_State = Count_Up;
+	    } else if(tmpA == 0x02){
+		Count_State = Count_Down_Wait;
+  	    } else if(tmpA == 0x03){
+		Count_State = Count_Zero;
+	    } else if(tmpA == 0){
+		Count_State = Count_Wait;
+	    }
+  	    break;
+	case Count_Down_Wait:
+	    if(tmpA ==0){
+		Count_State = Count_Wait;
+	    }
+	    else if(tmpA == 0x01){ 
+                Count_State = Count_Up;
+            } else if (tmpA == 0x02){ 
+                Count_State = Count_Down_Wait;
+            } else if (tmpA == 0x03){ 
+                Count_State = Count_Zero;
+            }
+	    break;
+	case Count_Zero:
+	    if(tmpA == 0x03){
+		Count_State = Count_Zero;
+	    }
+	    else if(tmpA == 0x01){
+		Count_State = Count_Up;
+	    } else if(tmpA ==0x02){
+		Count_State = Count_Down;
+	    }else if(tmpA == 0){
+		Count_State = Count_Wait;
 	    }
 	    break;
 	default:
-	    TurnOn_State = TurnOn_Start;
+	    Count_State = Count_State;
 	    break;
     }
 
-    switch(TurnOn_State){
-	case TurnOn_PB0:
-	   tmpB = 0x01;
-	   break;
-	case TurnOn_PB1:
-	   tmpB = 0x02;
-	   break;
+    switch(Count_State){
+	case Count_Up:
+	    if(count <9){
+		count = count+1;
+	    }
+	    break;
+	case Count_Down:
+	    if(count > 0){
+		count = count-1;;
+	    }
+	    break;
+   	case Count_Zero:
+	    count = 0;
+	    break;
     }
-    PORTB = tmpB;
 
+    PORTC = count;
 }
 
-int main(void) {
-    /* Insert DDR and PORT initializations */
-    DDRA = 0x00; PORTA = 0xFF;
-    DDRB = 0xFF; PORTB = 0x00;
-
-    TurnOn_State = TurnOn_PB0;
-
-    /* Insert your solution below */
-    while (1) {
-	tmpA = PINA & 0x01; 
-	Blink();
+int main(void)
+{
+    // PORTA: input   PORTC: output
+    DDRA = 0x00; PORTA = 0xFF; 
+    DDRC = 0xFF; PORTC = 0x00; 
+    count = 7;
+    
+    Count_State = Count_Wait; 
+    while (1) 
+    {
+	tmpA = PINA & 0x03;
+	Increment_Decrement();
     }
-
 }
 

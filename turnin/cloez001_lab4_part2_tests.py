@@ -31,24 +31,28 @@ tests = [ {'description': 'PINA: 0x00, 0x01, 0x00 => PORTC: 0x08',
 	      {'inputs': [('PINA', 0x00)], 'iterations': 1}],
     'expected': [('PORTC',0x08)],
     },
-    {'description': 'PINA: 0x01, 0x00, 0x01, 0x00 => PORTC: 0x02',
-    'steps': [{'inputs': [('PINA', 0x01)], 'iterations': 1},
+    {'description': 'PINA: 0x03, 0x00, 0x01, 0x00, 0x01, 0x00, 0x02 => PORTC: 0x02',
+    'steps': [{'inputs': [('PINA', 0x03)], 'iterations': 1},
               {'inputs': [('PINA', 0x00)], 'iterations': 1},
               {'inputs': [('PINA', 0x01)], 'iterations': 1}, 
-              {'inputs': [('PINA', 0x00)], 'iterations': 1}],
-    'expected': [('PORTC',0x09)],
+              {'inputs': [('PINA', 0x00)], 'iterations': 1}, 
+	      {'inputs': [('PINA', 0x01)], 'iterations': 1},
+              {'inputs': [('PINA', 0x00)], 'iterations': 1}, 
+              {'inputs': [('PINA', 0x02)], 'iterations': 1}],
+    'expected': [('PORTC',0x01)],
     }, 
-    {'description': 'PINA: 0x00, 0x01, 0x00, 0x03, 0x00 => PORTC: 0x00',
+    {'description': 'PINA: 0x00, 0x01, 0x01, 0x00, 0x02 => PORTC: 0x00',
     'steps': [{'inputs': [('PINA', 0x00)], 'iterations': 1},
               {'inputs': [('PINA', 0x01)], 'iterations': 1},
+              {'inputs': [('PINA', 0x01)], 'iterations': 1}, 
               {'inputs': [('PINA', 0x00)], 'iterations': 1}, 
-              {'inputs': [('PINA', 0x03)], 'iterations': 1}, 
-	      {'inputs': [('PINA', 0x00)], 'iterations': 1}],
-    'expected': [('PORTC',0x00)],
+	      {'inputs': [('PINA', 0x02)], 'iterations': 1}],
+    'expected': [('PORTC',0x07)],
     },
 
 
     ]
 
-#watch = ['state']
+watch = ['Count_State']
+
 
